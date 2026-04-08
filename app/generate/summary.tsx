@@ -20,12 +20,14 @@ export default function SummaryScreen() {
         <Text style={styles.caption}>Your saved ideas are now in your idea library.</Text>
       </View>
 
-      <PrimaryButton label="Go to My Ideas" onPress={() => router.replace('/ideas')} />
-      <PrimaryButton
-        label="Generate Again"
-        variant="secondary"
-        onPress={() => router.replace('/new-ideas')}
-      />
+      <View style={styles.actions}>
+        <PrimaryButton label="Go to My Ideas" onPress={() => router.replace('/ideas')} />
+        <PrimaryButton
+          label="Generate Again"
+          variant="secondary"
+          onPress={() => router.replace('/new-ideas')}
+        />
+      </View>
     </ScreenContainer>
   );
 }
@@ -53,5 +55,9 @@ const styles = StyleSheet.create({
   caption: {
     fontSize: 14,
     color: Theme.colors.textSecondary,
+  },
+  actions: {
+    gap: 12,
+    paddingBottom: 10,
   },
 });

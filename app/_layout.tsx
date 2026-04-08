@@ -5,7 +5,11 @@ import 'react-native-reanimated';
 export default function RootLayout() {
   return (
     <>
-      <Stack screenOptions={{ headerTitleStyle: { fontWeight: '700' } }}>
+      <Stack
+        screenOptions={{
+          headerTitleStyle: { fontWeight: '700' },
+          headerBackButtonDisplayMode: 'minimal',
+        }}>
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="ideas/create" options={{ title: 'Create Idea' }} />

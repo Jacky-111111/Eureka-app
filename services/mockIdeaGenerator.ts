@@ -56,6 +56,61 @@ const MOCK_IDEAS: Omit<Idea, 'id' | 'createdAt' | 'updatedAt'>[] = [
     tags: ['developer-tools', 'portfolio'],
     source: 'ai',
   },
+  {
+    title: 'Voice meeting notes to task board',
+    description:
+      'Converts meeting recordings into structured action items and auto-groups tasks by owner.',
+    category: 'Productivity Tool',
+    techStack: ['React Native', 'Whisper', 'Supabase'],
+    difficulty: 'Medium',
+    status: 'New',
+    tags: ['meetings', 'tasks'],
+    source: 'ai',
+  },
+  {
+    title: 'Campus event social map',
+    description:
+      'Shows student events on a live map, with check-ins and interest-based recommendations.',
+    category: 'Social',
+    techStack: ['Expo Maps', 'Firebase', 'TypeScript'],
+    difficulty: 'Easy',
+    status: 'New',
+    tags: ['students', 'events'],
+    source: 'ai',
+  },
+  {
+    title: 'AI landing page copy improver',
+    description:
+      'Analyzes product positioning and rewrites hero/CTA copy with tone and audience presets.',
+    category: 'AI Tool',
+    techStack: ['Next.js', 'OpenAI', 'Node.js'],
+    difficulty: 'Easy',
+    status: 'New',
+    tags: ['marketing', 'copywriting'],
+    source: 'ai',
+  },
+  {
+    title: 'Parent-child reading streak app',
+    description:
+      'Tracks shared reading sessions with fun badges and weekly progress for families.',
+    category: 'Education',
+    techStack: ['React Native', 'SQLite', 'Notifications'],
+    difficulty: 'Medium',
+    status: 'New',
+    tags: ['family', 'reading'],
+    source: 'ai',
+  },
+  {
+    title: 'Restaurant prep planner dashboard',
+    description:
+      'Helps small restaurants forecast prep needs from upcoming reservations and order history.',
+    category: 'Website',
+    techStack: ['React', 'Node.js', 'PostgreSQL'],
+    difficulty: 'Hard',
+    status: 'New',
+    tags: ['restaurant', 'operations'],
+    source: 'ai',
+  },
 ];
 
 const enrichIdea = (idea: Omit<Idea, 'id' | 'createdAt' | 'updatedAt'>): Idea => {
@@ -86,7 +141,10 @@ export const mockIdeaGenerator = {
       pool = [...MOCK_IDEAS];
     }
 
-    const ideas = pool.slice(0, 5).map(enrichIdea);
+    const desiredCount = Math.min(Math.max(request.count ?? 5, 1), 10);
+    const ideas = Array.from({ length: desiredCount }, (_, index) =>
+      enrichIdea(pool[index % pool.length]),
+    );
     return { ideas };
   },
 };

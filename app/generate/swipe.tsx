@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { Animated, PanResponder, StyleSheet, Text, View } from 'react-native';
+import { Animated, PanResponder, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
 import { EmptyState } from '@/components/EmptyState';
 import { PrimaryButton } from '@/components/PrimaryButton';
@@ -16,18 +16,22 @@ export default function SwipeDeckScreen() {
   const router = useRouter();
   const { generatedIdeas, clearSession } = useGeneratedIdeas();
   const { createIdea } = useIdeas();
+  const { width } = useWindowDimensions();
   const [index, setIndex] = useState(0);
   const [savedCount, setSavedCount] = useState(0);
   const [skippedCount, setSkippedCount] = useState(0);
   const position = useRef(new Animated.ValueXY()).current;
 
   const currentIdea = generatedIdeas[index];
+  const nextIdea = generatedIdeas[index + 1];
   const total = generatedIdeas.length;
   const isComplete = index >= total && total > 0;
+  const progress = total === 0 ? 0 : (index + 1) / total;
 
   const resetCard = useCallback(() => {
     Animated.spring(position, {
       toValue: { x: 0, y: 0 },
+      friction: 6,
       useNativeDriver: true,
     }).start();
   }, [position]);
@@ -60,6 +64,24 @@ export default function SwipeDeckScreen() {
     moveNext();
   }, [moveNext]);
 
+  const animateOut = useCallback(
+    (direction: 'save' | 'skip', velocityY = 0) => {
+      const x = direction === 'save' ? width * 0.95 : -width * 0.95;
+      Animated.timing(position, {
+        toValue: { x, y: velocityY * 0.25 },
+        duration: 180,
+        useNativeDriver: true,
+      }).start(() => {
+        if (direction === 'save') {
+          void handleSave();
+          return;
+        }
+        handleSkip();
+      });
+    },
+    [handleSave, handleSkip, position, width],
+  );
+
   const finishSession = () => {
     const count = savedCount;
     clearSession();
@@ -76,18 +98,36 @@ export default function SwipeDeckScreen() {
         }),
         onPanResponderRelease: (_, gestureState) => {
           if (gestureState.dx > SWIPE_THRESHOLD) {
-            void handleSave();
+            animateOut('save', gestureState.dy);
             return;
           }
           if (gestureState.dx < -SWIPE_THRESHOLD) {
-            handleSkip();
+            animateOut('skip', gestureState.dy);
             return;
           }
           resetCard();
         },
       }),
-    [handleSave, handleSkip, position, resetCard],
+    [animateOut, position, resetCard],
   );
+
+  const rotate = position.x.interpolate({
+    inputRange: [-width, 0, width],
+    outputRange: ['-10deg', '0deg', '10deg'],
+    extrapolate: 'clamp',
+  });
+
+  const saveBadgeOpacity = position.x.interpolate({
+    inputRange: [0, SWIPE_THRESHOLD * 0.6, SWIPE_THRESHOLD],
+    outputRange: [0, 0.4, 1],
+    extrapolate: 'clamp',
+  });
+
+  const skipBadgeOpacity = position.x.interpolate({
+    inputRange: [-SWIPE_THRESHOLD, -SWIPE_THRESHOLD * 0.6, 0],
+    outputRange: [1, 0.4, 0],
+    extrapolate: 'clamp',
+  });
 
   if (generatedIdeas.length === 0) {
     return (
@@ -122,17 +162,45 @@ export default function SwipeDeckScreen() {
           Idea {index + 1} / {total}
         </Text>
         <Text style={styles.tip}>Swipe right to save, left to skip</Text>
+        <View style={styles.progressTrack}>
+          <View style={[styles.progressFill, { width: `${Math.max(progress * 100, 8)}%` }]} />
+        </View>
       </View>
 
-      <Animated.View
-        style={[styles.deckCard, { transform: [...position.getTranslateTransform()] }]}
-        {...panResponder.panHandlers}>
-        {currentIdea ? <SwipeIdeaCard idea={currentIdea} /> : null}
-      </Animated.View>
+      <View style={styles.deckCard}>
+        {nextIdea ? (
+          <View style={styles.backCard}>
+            <SwipeIdeaCard idea={nextIdea} dimmed />
+          </View>
+        ) : null}
 
-      <View style={styles.actions}>
-        <PrimaryButton label="Skip" variant="secondary" onPress={handleSkip} style={styles.action} />
-        <PrimaryButton label="Save" onPress={() => void handleSave()} style={styles.action} />
+        <Animated.View
+          style={[
+            styles.frontCard,
+            { transform: [...position.getTranslateTransform(), { rotate }] },
+          ]}
+          {...panResponder.panHandlers}>
+          {currentIdea ? <SwipeIdeaCard idea={currentIdea} /> : null}
+
+          <Animated.View style={[styles.intentBadgeLeft, { opacity: skipBadgeOpacity }]}>
+            <Text style={styles.intentTextSkip}>SKIP</Text>
+          </Animated.View>
+          <Animated.View style={[styles.intentBadgeRight, { opacity: saveBadgeOpacity }]}>
+            <Text style={styles.intentTextSave}>SAVE</Text>
+          </Animated.View>
+        </Animated.View>
+      </View>
+
+      <View style={styles.actionsWrap}>
+        <View style={styles.actions}>
+          <PrimaryButton
+            label="Skip"
+            variant="secondary"
+            onPress={() => animateOut('skip')}
+            style={styles.action}
+          />
+          <PrimaryButton label="Save" onPress={() => animateOut('save')} style={styles.action} />
+        </View>
       </View>
     </ScreenContainer>
   );
@@ -141,26 +209,95 @@ export default function SwipeDeckScreen() {
 const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
-    gap: 4,
-    marginTop: 8,
+    gap: 6,
+    marginTop: 2,
+    marginBottom: 2,
   },
   counter: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 31,
+    fontWeight: '800',
     color: Theme.colors.text,
   },
   tip: {
     fontSize: 14,
     color: Theme.colors.textSecondary,
   },
+  progressTrack: {
+    width: '100%',
+    height: 6,
+    borderRadius: 999,
+    backgroundColor: '#E2E8F0',
+    overflow: 'hidden',
+    marginTop: 2,
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 999,
+    backgroundColor: Theme.colors.primary,
+  },
   deckCard: {
     flex: 1,
     justifyContent: 'center',
+    position: 'relative',
+    marginTop: 4,
+  },
+  backCard: {
+    position: 'absolute',
+    left: 10,
+    right: 10,
+    top: 10,
+    transform: [{ scale: 0.97 }],
+  },
+  frontCard: {
+    zIndex: 2,
+  },
+  intentBadgeLeft: {
+    position: 'absolute',
+    top: 24,
+    left: 20,
+    borderWidth: 2,
+    borderColor: Theme.colors.danger,
+    borderRadius: Theme.radius.sm,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    transform: [{ rotate: '-12deg' }],
+    backgroundColor: '#FFFFFFEE',
+  },
+  intentBadgeRight: {
+    position: 'absolute',
+    top: 24,
+    right: 20,
+    borderWidth: 2,
+    borderColor: Theme.colors.success,
+    borderRadius: Theme.radius.sm,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    transform: [{ rotate: '12deg' }],
+    backgroundColor: '#FFFFFFEE',
+  },
+  intentTextSkip: {
+    color: Theme.colors.danger,
+    fontSize: 16,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+  },
+  intentTextSave: {
+    color: Theme.colors.success,
+    fontSize: 16,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+  },
+  actionsWrap: {
+    backgroundColor: '#FFFFFFB8',
+    borderRadius: Theme.radius.lg,
+    borderWidth: 1,
+    borderColor: Theme.colors.border,
+    padding: 8,
+    marginBottom: 8,
   },
   actions: {
     flexDirection: 'row',
     gap: 12,
-    marginBottom: 8,
   },
   action: {
     flex: 1,

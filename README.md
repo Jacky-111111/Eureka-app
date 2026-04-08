@@ -1,50 +1,58 @@
-# Welcome to your Expo app 👋
+# Eureka App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+AI-assisted idea management app built with Expo + React Native.
 
-## Get started
+## Current Features
 
-1. Install dependencies
+- Generate idea candidates from AI flow (`New Ideas`) with category, difficulty, and count filters.
+- Swipe deck experience (`Save` / `Skip`) for generated ideas.
+- Persist idea library locally (create, edit, archive, delete).
+- Idea detail page with metadata and management actions.
+- **New:** Idea detail AI assistant:
+  - Generate structured AI review (score, strengths, weaknesses, suggestions).
+  - Continue chatting with AI about the current idea (MVP, risks, positioning, pricing, GTM, etc.).
+
+## Tech Stack
+
+- Expo / React Native / TypeScript
+- Expo Router (file-based routing)
+- AsyncStorage (local persistence)
+- OpenAI Responses API (idea detail AI review + chat)
+
+## Local Setup
+
+1. Install dependencies:
 
    ```bash
    npm install
    ```
 
-2. Start the app
+2. Create `.env` in project root (or update it) with:
+
+   ```env
+   EXPO_PUBLIC_API_BASE_URL=http://localhost:3000
+   EXPO_PUBLIC_OPENAI_API_KEY=your_openai_api_key_here
+   EXPO_PUBLIC_OPENAI_MODEL=gpt-4.1-mini
+   ```
+
+3. Start the app:
 
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+## AI Integration Notes
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- `Idea Detail` AI features are implemented in:
+  - `services/ideaAssistantService.ts`
+  - `app/ideas/[id].tsx`
+- Current implementation calls OpenAI directly from app env vars for local development.
+- For production, move API key to your backend and proxy requests securely.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Scripts
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- `npm run start` - start Expo
+- `npm run android` - run Android
+- `npm run ios` - run iOS
+- `npm run web` - run web
+- `npm run lint` - run lint

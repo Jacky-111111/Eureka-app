@@ -31,6 +31,7 @@ export type IdeaGenerationRequest = {
   prompt?: string;
   category?: IdeaCategory | 'Any';
   difficulty?: IdeaDifficulty | 'Any';
+  count?: number;
 };
 
 export type GeneratedIdeaResponse = {
@@ -40,3 +41,16 @@ export type GeneratedIdeaResponse = {
 export type CreateIdeaInput = Omit<Idea, 'id' | 'createdAt' | 'updatedAt'>;
 
 export type UpdateIdeaInput = Partial<Omit<Idea, 'id' | 'createdAt'>>;
+
+export type IdeaAiReview = {
+  summary: string;
+  strengths: string[];
+  weaknesses: string[];
+  suggestions: string[];
+  score: number;
+};
+
+export type IdeaAiChatMessage = {
+  role: 'user' | 'assistant';
+  content: string;
+};
