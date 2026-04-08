@@ -16,7 +16,7 @@ import { formatDate } from '@/utils/formatDate';
 export default function IdeaDetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ id: string }>();
-  const { ideas, loading, refresh, archiveIdea, deleteIdea } = useIdeas();
+  const { ideas, loading, refresh, deleteIdea } = useIdeas();
   const [submitting, setSubmitting] = useState(false);
   const [review, setReview] = useState<IdeaAiReview | null>(null);
   const [reviewLoading, setReviewLoading] = useState(false);
@@ -33,20 +33,6 @@ export default function IdeaDetailScreen() {
       void refresh();
     }, [refresh]),
   );
-
-  const handleArchive = async () => {
-    if (!idea) {
-      return;
-    }
-    setSubmitting(true);
-    try {
-      await archiveIdea(idea.id);
-      Alert.alert('Archived', 'Idea moved to Archived.');
-      router.back();
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   const handleDelete = async () => {
     if (!idea) {
@@ -140,10 +126,14 @@ export default function IdeaDetailScreen() {
     <ScreenContainer scroll>
       <IdeaCard idea={idea} />
       <View style={styles.metaCard}>
-        <Text style={styles.metaLabel}>Created</Text>
-        <Text style={styles.metaValue}>{formatDate(idea.createdAt)}</Text>
-        <Text style={styles.metaLabel}>Updated</Text>
-        <Text style={styles.metaValue}>{formatDate(idea.updatedAt)}</Text>
+        <View style={styles.metaItem}>
+          <Text style={styles.metaLabel}>Created</Text>
+          <Text style={styles.metaValue}>{formatDate(idea.createdAt)}</Text>
+        </View>
+        <View style={styles.metaItem}>
+          <Text style={styles.metaLabel}>Updated</Text>
+          <Text style={styles.metaValue}>{formatDate(idea.updatedAt)}</Text>
+        </View>
       </View>
 
       <View style={styles.aiCard}>
@@ -231,12 +221,6 @@ export default function IdeaDetailScreen() {
 
       <PrimaryButton label="Edit Idea" onPress={() => router.push(`/ideas/edit?id=${idea.id}`)} />
       <PrimaryButton
-        label={submitting ? 'Archiving...' : 'Archive Idea'}
-        variant="secondary"
-        onPress={handleArchive}
-        disabled={submitting}
-      />
-      <PrimaryButton
         label={submitting ? 'Deleting...' : 'Delete Idea'}
         variant="danger"
         onPress={handleDelete}
@@ -252,20 +236,28 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Theme.colors.border,
     borderRadius: Theme.radius.md,
-    padding: Theme.spacing.md,
-    gap: 4,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 12,
+  },
+  metaItem: {
+    flex: 1,
+    gap: 2,
   },
   metaLabel: {
-    fontSize: 12,
+    fontSize: 11,
     textTransform: 'uppercase',
     color: Theme.colors.textSecondary,
     fontWeight: '700',
-    marginTop: 6,
+    letterSpacing: 0.5,
   },
   metaValue: {
-    fontSize: 16,
+    fontSize: 13,
     color: Theme.colors.text,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   aiCard: {
     backgroundColor: Theme.colors.surface,
