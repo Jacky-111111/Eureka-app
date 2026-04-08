@@ -10,7 +10,7 @@ import { Theme } from '@/constants/theme';
 import { useGeneratedIdeas } from '@/hooks/useGeneratedIdeas';
 import type { IdeaDifficulty, IdeaGenerationRequest } from '@/types/idea';
 
-export default function GenerateIdeasScreen() {
+export default function NewIdeasTabScreen() {
   const router = useRouter();
   const { loading, error, generateIdeas } = useGeneratedIdeas();
 
@@ -33,9 +33,9 @@ export default function GenerateIdeasScreen() {
   return (
     <ScreenContainer scroll>
       <View style={styles.header}>
-        <Text style={styles.title}>Generate AI Ideas</Text>
+        <Text style={styles.title}>See New Ideas</Text>
         <Text style={styles.subtitle}>
-          Add an optional prompt and preferences, then swipe through generated ideas.
+          AI generate new ideas, then use Tinder-style swipe to save or skip.
         </Text>
       </View>
 
@@ -83,7 +83,7 @@ export default function GenerateIdeasScreen() {
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       <PrimaryButton
-        label={loading ? 'Generating...' : 'Generate Ideas'}
+        label={loading ? 'Generating...' : 'Generate & Start Swiping'}
         onPress={handleGenerate}
         disabled={loading}
       />

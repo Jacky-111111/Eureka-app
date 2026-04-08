@@ -1,6 +1,6 @@
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useMemo, useState } from 'react';
+import { FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { EmptyState } from '@/components/EmptyState';
 import { FilterBar } from '@/components/FilterBar';
@@ -11,8 +11,9 @@ import { ScreenContainer } from '@/components/ScreenContainer';
 import { Theme } from '@/constants/theme';
 import { useIdeas } from '@/hooks/useIdeas';
 
-export default function MyIdeasScreen() {
+export default function MyIdeasTabScreen() {
   const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
   const {
     displayedIdeas,
     loading,
@@ -30,6 +31,24 @@ export default function MyIdeasScreen() {
     }, [refresh]),
   );
 
+  const searchedIdeas = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) {
+      return displayedIdeas;
+    }
+
+    return displayedIdeas.filter((idea) => {
+      const tags = idea.tags?.join(' ').toLowerCase() ?? '';
+      const techStack = idea.techStack.join(' ').toLowerCase();
+      return (
+        idea.title.toLowerCase().includes(query) ||
+        idea.description.toLowerCase().includes(query) ||
+        tags.includes(query) ||
+        techStack.includes(query)
+      );
+    });
+  }, [displayedIdeas, searchQuery]);
+
   return (
     <ScreenContainer>
       <View style={styles.header}>
@@ -44,21 +63,37 @@ export default function MyIdeasScreen() {
         onSortChange={setSortOption}
       />
 
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Search ideas, tags, tech stack..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+      />
+
       {loading ? <LoadingState message="Loading ideas..." /> : null}
       {!loading && error ? <Text style={styles.error}>{error}</Text> : null}
 
       {!loading && !error && displayedIdeas.length === 0 ? (
         <EmptyState
           title="No saved ideas yet"
-          message="Create one manually or save ideas from the swipe deck."
-          actionLabel="Create Idea"
+          message="Create your first idea manually to start building your library."
+          actionLabel="Create New Idea"
           onAction={() => router.push('/ideas/create')}
         />
       ) : null}
 
-      {!loading && !error && displayedIdeas.length > 0 ? (
+      {!loading && !error && displayedIdeas.length > 0 && searchedIdeas.length === 0 ? (
+        <EmptyState
+          title="No matching ideas"
+          message="Try a different keyword or clear search."
+          actionLabel="Clear Search"
+          onAction={() => setSearchQuery('')}
+        />
+      ) : null}
+
+      {!loading && !error && searchedIdeas.length > 0 ? (
         <FlatList
-          data={displayedIdeas}
+          data={searchedIdeas}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
           renderItem={({ item }) => (
@@ -89,6 +124,16 @@ const styles = StyleSheet.create({
   list: {
     gap: 10,
     paddingVertical: 12,
+  },
+  searchInput: {
+    backgroundColor: Theme.colors.surface,
+    borderRadius: Theme.radius.md,
+    borderWidth: 1,
+    borderColor: Theme.colors.border,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 15,
+    color: Theme.colors.text,
   },
   error: {
     color: Theme.colors.danger,

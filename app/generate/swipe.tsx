@@ -96,7 +96,7 @@ export default function SwipeDeckScreen() {
           title="No generated ideas"
           message="Run idea generation first to start swiping."
           actionLabel="Back to Generator"
-          onAction={() => router.replace('/generate')}
+          onAction={() => router.replace('/new-ideas')}
         />
       </ScreenContainer>
     );

@@ -24,7 +24,7 @@ export default function SummaryScreen() {
       <PrimaryButton
         label="Generate Again"
         variant="secondary"
-        onPress={() => router.replace('/generate')}
+        onPress={() => router.replace('/new-ideas')}
       />
     </ScreenContainer>
   );
