@@ -1,6 +1,7 @@
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import Markdown from 'react-native-markdown-display';
 
 import { EmptyState } from '@/components/EmptyState';
 import { IdeaCard } from '@/components/IdeaCard';
@@ -189,7 +190,11 @@ export default function IdeaDetailScreen() {
                   message.role === 'user' ? styles.userBubble : styles.assistantBubble,
                 ]}>
                 <Text style={styles.chatRole}>{message.role === 'user' ? 'You' : 'AI Mentor'}</Text>
-                <Text style={styles.chatText}>{message.content}</Text>
+                {message.role === 'assistant' ? (
+                  <Markdown style={markdownStyles}>{message.content}</Markdown>
+                ) : (
+                  <Text style={styles.chatText}>{message.content}</Text>
+                )}
               </View>
             ))
           )}
@@ -366,5 +371,60 @@ const styles = StyleSheet.create({
     color: Theme.colors.danger,
     fontWeight: '600',
     fontSize: 13,
+  },
+});
+
+const markdownStyles = StyleSheet.create({
+  body: {
+    color: Theme.colors.text,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  paragraph: {
+    marginTop: 0,
+    marginBottom: 8,
+  },
+  strong: {
+    fontWeight: '800',
+    color: Theme.colors.text,
+  },
+  bullet_list: {
+    marginTop: 4,
+    marginBottom: 4,
+  },
+  ordered_list: {
+    marginTop: 4,
+    marginBottom: 4,
+  },
+  list_item: {
+    color: Theme.colors.text,
+  },
+  heading1: {
+    fontSize: 18,
+    fontWeight: '800',
+    marginTop: 2,
+    marginBottom: 8,
+    color: Theme.colors.text,
+  },
+  heading2: {
+    fontSize: 16,
+    fontWeight: '800',
+    marginTop: 2,
+    marginBottom: 8,
+    color: Theme.colors.text,
+  },
+  code_inline: {
+    backgroundColor: '#E2E8F0',
+    color: Theme.colors.text,
+    borderRadius: 6,
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+  },
+  fence: {
+    backgroundColor: '#0F172A',
+    color: '#F8FAFC',
+    borderRadius: 8,
+    padding: 10,
+    marginVertical: 6,
   },
 });

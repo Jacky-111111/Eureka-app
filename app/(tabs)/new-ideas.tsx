@@ -6,9 +6,15 @@ import { PrimaryButton } from '@/components/PrimaryButton';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { IDEA_CATEGORIES } from '@/constants/categories';
 import { IDEA_DIFFICULTIES } from '@/constants/difficulty';
+import { IDEA_SOCIAL_THEME_PREFERENCES, IDEA_TECH_STACK_PREFERENCES } from '@/constants/generationFilters';
 import { Theme } from '@/constants/theme';
 import { useGeneratedIdeas } from '@/hooks/useGeneratedIdeas';
-import type { IdeaDifficulty, IdeaGenerationRequest } from '@/types/idea';
+import type {
+  IdeaDifficulty,
+  IdeaGenerationRequest,
+  IdeaSocialThemePreference,
+  IdeaTechStackPreference,
+} from '@/types/idea';
 
 const IDEA_COUNT_OPTIONS = Array.from({ length: 10 }, (_, index) => index + 1);
 const COUNT_ITEM_WIDTH = 56;
@@ -25,6 +31,8 @@ export default function NewIdeasTabScreen() {
   const [prompt, setPrompt] = useState('');
   const [category, setCategory] = useState<IdeaGenerationRequest['category']>('Any');
   const [difficulty, setDifficulty] = useState<IdeaGenerationRequest['difficulty']>('Any');
+  const [techStack, setTechStack] = useState<IdeaTechStackPreference>('Any');
+  const [socialTheme, setSocialTheme] = useState<IdeaSocialThemePreference>('Any');
   const [count, setCount] = useState<number>(5);
   const countHorizontalPadding = Math.max(0, (width - COUNT_ITEM_WIDTH) / 2 - Theme.spacing.md);
 
@@ -45,6 +53,8 @@ export default function NewIdeasTabScreen() {
       prompt: prompt.trim() || undefined,
       category,
       difficulty,
+      techStack,
+      socialTheme,
       count,
     });
 
@@ -96,6 +106,36 @@ export default function NewIdeasTabScreen() {
               label={value}
               onPress={() => setDifficulty(value)}
               variant={difficulty === value ? 'primary' : 'secondary'}
+              style={styles.chip}
+            />
+          ))}
+        </View>
+      </View>
+
+      <View style={styles.group}>
+        <Text style={styles.label}>Tech stack preference</Text>
+        <View style={styles.row}>
+          {IDEA_TECH_STACK_PREFERENCES.map((value) => (
+            <PrimaryButton
+              key={value}
+              label={value}
+              onPress={() => setTechStack(value)}
+              variant={techStack === value ? 'primary' : 'secondary'}
+              style={styles.chip}
+            />
+          ))}
+        </View>
+      </View>
+
+      <View style={styles.group}>
+        <Text style={styles.label}>Social theme</Text>
+        <View style={styles.row}>
+          {IDEA_SOCIAL_THEME_PREFERENCES.map((value) => (
+            <PrimaryButton
+              key={value}
+              label={value}
+              onPress={() => setSocialTheme(value)}
+              variant={socialTheme === value ? 'primary' : 'secondary'}
               style={styles.chip}
             />
           ))}

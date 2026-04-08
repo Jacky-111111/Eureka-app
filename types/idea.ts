@@ -13,6 +13,24 @@ export type IdeaStatus = 'New' | 'Exploring' | 'Building' | 'Archived';
 
 export type IdeaSource = 'manual' | 'ai';
 
+export type IdeaTechStackPreference =
+  | 'Any'
+  | 'Mobile'
+  | 'Web'
+  | 'Python'
+  | 'JavaScript/TypeScript'
+  | 'Firebase'
+  | 'AI/API';
+
+export type IdeaSocialThemePreference =
+  | 'Any'
+  | 'Students'
+  | 'Health'
+  | 'Family'
+  | 'Community'
+  | 'Travel'
+  | 'Sustainability';
+
 export type Idea = {
   id: string;
   title: string;
@@ -31,6 +49,8 @@ export type IdeaGenerationRequest = {
   prompt?: string;
   category?: IdeaCategory | 'Any';
   difficulty?: IdeaDifficulty | 'Any';
+  techStack?: IdeaTechStackPreference;
+  socialTheme?: IdeaSocialThemePreference;
   count?: number;
 };
 

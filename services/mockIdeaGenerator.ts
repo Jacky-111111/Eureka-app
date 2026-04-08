@@ -123,6 +123,55 @@ const enrichIdea = (idea: Omit<Idea, 'id' | 'createdAt' | 'updatedAt'>): Idea =>
   };
 };
 
+const normalize = (value: string) => value.toLowerCase();
+
+const matchesTechStackPreference = (idea: Omit<Idea, 'id' | 'createdAt' | 'updatedAt'>, preference: string) => {
+  const tech = idea.techStack.map(normalize).join(' ');
+
+  switch (preference) {
+    case 'Mobile':
+      return tech.includes('react native') || tech.includes('expo');
+    case 'Web':
+      return tech.includes('react') || tech.includes('next.js') || tech.includes('node.js');
+    case 'Python':
+      return tech.includes('python');
+    case 'JavaScript/TypeScript':
+      return tech.includes('javascript') || tech.includes('typescript') || tech.includes('node.js');
+    case 'Firebase':
+      return tech.includes('firebase');
+    case 'AI/API':
+      return (
+        tech.includes('openai') ||
+        tech.includes('vision api') ||
+        tech.includes('whisper') ||
+        tech.includes('api')
+      );
+    default:
+      return true;
+  }
+};
+
+const matchesSocialTheme = (idea: Omit<Idea, 'id' | 'createdAt' | 'updatedAt'>, theme: string) => {
+  const searchableText = `${idea.title} ${idea.description} ${(idea.tags ?? []).join(' ')}`.toLowerCase();
+
+  switch (theme) {
+    case 'Students':
+      return searchableText.includes('student') || searchableText.includes('campus') || searchableText.includes('school');
+    case 'Health':
+      return searchableText.includes('health') || searchableText.includes('habit') || searchableText.includes('focus');
+    case 'Family':
+      return searchableText.includes('family') || searchableText.includes('parent') || searchableText.includes('child');
+    case 'Community':
+      return searchableText.includes('community') || searchableText.includes('social') || searchableText.includes('events');
+    case 'Travel':
+      return searchableText.includes('travel') || searchableText.includes('menu') || searchableText.includes('translator');
+    case 'Sustainability':
+      return searchableText.includes('sustain') || searchableText.includes('climate') || searchableText.includes('carbon');
+    default:
+      return true;
+  }
+};
+
 export const mockIdeaGenerator = {
   async generateIdeas(request: IdeaGenerationRequest): Promise<GeneratedIdeaResponse> {
     await new Promise((resolve) => setTimeout(resolve, 800));
@@ -135,6 +184,14 @@ export const mockIdeaGenerator = {
 
     if (request.difficulty && request.difficulty !== 'Any') {
       pool = pool.filter((idea) => idea.difficulty === request.difficulty);
+    }
+
+    if (request.techStack && request.techStack !== 'Any') {
+      pool = pool.filter((idea) => matchesTechStackPreference(idea, request.techStack as string));
+    }
+
+    if (request.socialTheme && request.socialTheme !== 'Any') {
+      pool = pool.filter((idea) => matchesSocialTheme(idea, request.socialTheme as string));
     }
 
     if (pool.length === 0) {

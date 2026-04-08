@@ -22,7 +22,7 @@ export const FilterBar = ({
 
   return (
     <View style={styles.container}>
-      <View style={styles.rowBetween}>
+      <View style={styles.labelRow}>
         <Text style={styles.label}>Category</Text>
         {selectedCategory !== 'All' ? (
           <Pressable onPress={() => onCategoryChange('All')}>
@@ -75,10 +75,10 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: Theme.colors.surface,
     borderRadius: Theme.radius.md,
-    padding: 12,
+    padding: 10,
     borderWidth: 1,
     borderColor: Theme.colors.border,
-    gap: 10,
+    gap: 8,
   },
   label: {
     fontSize: 11,
@@ -87,10 +87,10 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Theme.colors.textSecondary,
   },
-  rowBetween: {
+  labelRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 8,
   },
   resetText: {
     fontSize: 13,
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
   },
   categoriesRow: {
     gap: 8,
-    paddingRight: 4,
+    paddingRight: 0,
   },
   chip: {
     borderWidth: 1,

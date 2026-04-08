@@ -6,6 +6,16 @@ type OpenAIInputMessage = {
   content: Array<{ type: 'input_text'; text: string }>;
 };
 
+type OpenAIResponse = {
+  output_text?: string;
+  output?: Array<{
+    content?: Array<{
+      type?: string;
+      text?: string;
+    }>;
+  }>;
+};
+
 const OPENAI_API_URL = 'https://api.openai.com/v1/responses';
 const MAX_CHAT_HISTORY = 8;
 
@@ -22,6 +32,26 @@ const ensureApiKey = () => {
   if (!OPENAI_API_KEY) {
     throw new Error('Missing EXPO_PUBLIC_OPENAI_API_KEY. Please add it in your local .env file.');
   }
+};
+
+const extractResponseText = (data: OpenAIResponse): string => {
+  if (typeof data.output_text === 'string' && data.output_text.trim()) {
+    return data.output_text.trim();
+  }
+
+  const fallbackText =
+    data.output
+      ?.flatMap((item) => item.content ?? [])
+      .filter((content) => content.type === 'output_text' || content.type === 'text')
+      .map((content) => content.text ?? '')
+      .join('\n')
+      .trim() ?? '';
+
+  if (fallbackText) {
+    return fallbackText;
+  }
+
+  return '';
 };
 
 const requestOpenAI = async (messages: OpenAIInputMessage[]): Promise<string> => {
@@ -45,12 +75,13 @@ const requestOpenAI = async (messages: OpenAIInputMessage[]): Promise<string> =>
     throw new Error(`OpenAI request failed (${response.status}): ${detail}`);
   }
 
-  const data = (await response.json()) as { output_text?: string };
-  if (!data.output_text || !data.output_text.trim()) {
+  const data = (await response.json()) as OpenAIResponse;
+  const text = extractResponseText(data);
+  if (!text) {
     throw new Error('OpenAI returned an empty response.');
   }
 
-  return data.output_text.trim();
+  return text;
 };
 
 const parseReviewJson = (raw: string): IdeaAiReview => {

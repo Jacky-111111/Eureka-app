@@ -53,35 +53,37 @@ export default function MyIdeasTabScreen() {
 
   return (
     <ScreenContainer>
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Search ideas, tags, tech stack..."
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-      />
+      <View style={styles.topControls}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search ideas, tags, tech stack..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
 
-      <FilterBar
-        selectedCategory={categoryFilter}
-        selectedSort={sortOption}
-        onCategoryChange={setCategoryFilter}
-        onSortChange={setSortOption}
-      />
+        <FilterBar
+          selectedCategory={categoryFilter}
+          selectedSort={sortOption}
+          onCategoryChange={setCategoryFilter}
+          onSortChange={setSortOption}
+        />
 
-      <View style={styles.viewToggle}>
-        <Pressable
-          style={[styles.viewToggleItem, viewMode === 'list' && styles.viewToggleItemActive]}
-          onPress={() => setViewMode('list')}>
-          <Text style={[styles.viewToggleText, viewMode === 'list' && styles.viewToggleTextActive]}>
-            List
-          </Text>
-        </Pressable>
-        <Pressable
-          style={[styles.viewToggleItem, viewMode === 'grid' && styles.viewToggleItemActive]}
-          onPress={() => setViewMode('grid')}>
-          <Text style={[styles.viewToggleText, viewMode === 'grid' && styles.viewToggleTextActive]}>
-            Grid
-          </Text>
-        </Pressable>
+        <View style={styles.viewToggle}>
+          <Pressable
+            style={[styles.viewToggleItem, viewMode === 'list' && styles.viewToggleItemActive]}
+            onPress={() => setViewMode('list')}>
+            <Text style={[styles.viewToggleText, viewMode === 'list' && styles.viewToggleTextActive]}>
+              List
+            </Text>
+          </Pressable>
+          <Pressable
+            style={[styles.viewToggleItem, viewMode === 'grid' && styles.viewToggleItemActive]}
+            onPress={() => setViewMode('grid')}>
+            <Text style={[styles.viewToggleText, viewMode === 'grid' && styles.viewToggleTextActive]}>
+              Grid
+            </Text>
+          </Pressable>
+        </View>
       </View>
 
       {loading ? <LoadingState message="Loading ideas..." /> : null}
@@ -153,9 +155,13 @@ const GridIdeaItem = ({ idea, onPress }: GridIdeaItemProps) => (
 );
 
 const styles = StyleSheet.create({
+  topControls: {
+    gap: 8,
+    marginBottom: 6,
+  },
   list: {
     gap: 10,
-    paddingVertical: 12,
+    paddingVertical: 8,
   },
   gridRow: {
     gap: 10,
