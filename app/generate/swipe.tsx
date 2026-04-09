@@ -20,6 +20,7 @@ export default function SwipeDeckScreen() {
   const [index, setIndex] = useState(0);
   const [savedCount, setSavedCount] = useState(0);
   const [skippedCount, setSkippedCount] = useState(0);
+  const [swipeIntent, setSwipeIntent] = useState<'neutral' | 'save' | 'skip'>('neutral');
   const position = useRef(new Animated.ValueXY()).current;
 
   const currentIdea = generatedIdeas[index];
@@ -29,6 +30,7 @@ export default function SwipeDeckScreen() {
   const progress = total === 0 ? 0 : (index + 1) / total;
 
   const resetCard = useCallback(() => {
+    setSwipeIntent('neutral');
     Animated.spring(position, {
       toValue: { x: 0, y: 0 },
       friction: 6,
@@ -37,6 +39,7 @@ export default function SwipeDeckScreen() {
   }, [position]);
 
   const moveNext = useCallback(() => {
+    setSwipeIntent('neutral');
     position.setValue({ x: 0, y: 0 });
     setIndex((prev) => prev + 1);
   }, [position]);
@@ -66,6 +69,7 @@ export default function SwipeDeckScreen() {
 
   const animateOut = useCallback(
     (direction: 'save' | 'skip', velocityY = 0) => {
+      setSwipeIntent(direction);
       const x = direction === 'save' ? width * 0.95 : -width * 0.95;
       Animated.timing(position, {
         toValue: { x, y: velocityY * 0.25 },
@@ -93,9 +97,18 @@ export default function SwipeDeckScreen() {
       PanResponder.create({
         onMoveShouldSetPanResponder: (_, gestureState) =>
           Math.abs(gestureState.dx) > 8 || Math.abs(gestureState.dy) > 8,
-        onPanResponderMove: Animated.event([null, { dx: position.x, dy: position.y }], {
-          useNativeDriver: false,
-        }),
+        onPanResponderMove: (_, gestureState) => {
+          position.setValue({ x: gestureState.dx, y: gestureState.dy });
+          if (gestureState.dx > 30) {
+            setSwipeIntent('save');
+            return;
+          }
+          if (gestureState.dx < -30) {
+            setSwipeIntent('skip');
+            return;
+          }
+          setSwipeIntent('neutral');
+        },
         onPanResponderRelease: (_, gestureState) => {
           if (gestureState.dx > SWIPE_THRESHOLD) {
             animateOut('save', gestureState.dy);
@@ -170,7 +183,7 @@ export default function SwipeDeckScreen() {
       <View style={styles.deckCard}>
         {nextIdea ? (
           <View style={styles.backCard}>
-            <SwipeIdeaCard idea={nextIdea} dimmed />
+            <SwipeIdeaCard idea={nextIdea} dimmed intent="neutral" />
           </View>
         ) : null}
 
@@ -180,7 +193,7 @@ export default function SwipeDeckScreen() {
             { transform: [...position.getTranslateTransform(), { rotate }] },
           ]}
           {...panResponder.panHandlers}>
-          {currentIdea ? <SwipeIdeaCard idea={currentIdea} /> : null}
+          {currentIdea ? <SwipeIdeaCard idea={currentIdea} intent={swipeIntent} /> : null}
 
           <Animated.View style={[styles.intentBadgeLeft, { opacity: skipBadgeOpacity }]}>
             <Text style={styles.intentTextSkip}>SKIP</Text>

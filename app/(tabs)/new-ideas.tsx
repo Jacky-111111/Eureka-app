@@ -4,12 +4,16 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDime
 
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { ScreenContainer } from '@/components/ScreenContainer';
-import { IDEA_CATEGORIES } from '@/constants/categories';
 import { IDEA_DIFFICULTIES } from '@/constants/difficulty';
-import { IDEA_SOCIAL_THEME_PREFERENCES, IDEA_TECH_STACK_PREFERENCES } from '@/constants/generationFilters';
+import {
+  IDEA_GENERATION_CATEGORY_PREFERENCES,
+  IDEA_SOCIAL_THEME_PREFERENCES,
+  IDEA_TECH_STACK_PREFERENCES,
+} from '@/constants/generationFilters';
 import { Theme } from '@/constants/theme';
 import { useGeneratedIdeas } from '@/hooks/useGeneratedIdeas';
 import type {
+  IdeaGenerationCategoryPreference,
   IdeaDifficulty,
   IdeaGenerationRequest,
   IdeaSocialThemePreference,
@@ -21,6 +25,21 @@ const COUNT_ITEM_WIDTH = 56;
 const COUNT_ITEM_GAP = 10;
 const COUNT_SNAP_INTERVAL = COUNT_ITEM_WIDTH + COUNT_ITEM_GAP;
 const COUNT_EDGE_FADE_WIDTH = 42;
+const FILTER_CHIP_HEIGHT = 42;
+
+const toggleMultiSelection = <T extends string>(selected: T[], value: T): T[] => {
+  if (value === 'Any') {
+    return ['Any' as T];
+  }
+
+  const next = selected.filter((item) => item !== ('Any' as T));
+  if (next.includes(value)) {
+    const removed = next.filter((item) => item !== value);
+    return removed.length === 0 ? ['Any' as T] : removed;
+  }
+
+  return [...next, value];
+};
 
 export default function NewIdeasTabScreen() {
   const router = useRouter();
@@ -29,10 +48,10 @@ export default function NewIdeasTabScreen() {
   const countScrollRef = useRef<ScrollView | null>(null);
 
   const [prompt, setPrompt] = useState('');
-  const [category, setCategory] = useState<IdeaGenerationRequest['category']>('Any');
   const [difficulty, setDifficulty] = useState<IdeaGenerationRequest['difficulty']>('Any');
-  const [techStack, setTechStack] = useState<IdeaTechStackPreference>('Any');
-  const [socialTheme, setSocialTheme] = useState<IdeaSocialThemePreference>('Any');
+  const [categories, setCategories] = useState<IdeaGenerationCategoryPreference[]>(['Any']);
+  const [techStacks, setTechStacks] = useState<IdeaTechStackPreference[]>(['Any']);
+  const [socialThemes, setSocialThemes] = useState<IdeaSocialThemePreference[]>(['Any']);
   const [count, setCount] = useState<number>(5);
   const countHorizontalPadding = Math.max(0, (width - COUNT_ITEM_WIDTH) / 2 - Theme.spacing.md);
 
@@ -51,10 +70,10 @@ export default function NewIdeasTabScreen() {
   const handleGenerate = async () => {
     const ideas = await generateIdeas({
       prompt: prompt.trim() || undefined,
-      category,
       difficulty,
-      techStack,
-      socialTheme,
+      categories,
+      techStacks,
+      socialThemes,
       count,
     });
 
@@ -84,17 +103,22 @@ export default function NewIdeasTabScreen() {
 
       <View style={styles.group}>
         <Text style={styles.label}>Category preference</Text>
-        <View style={styles.row}>
-          {(['Any', ...IDEA_CATEGORIES] as const).map((value) => (
-            <PrimaryButton
-              key={value}
-              label={value}
-              onPress={() => setCategory(value)}
-              variant={category === value ? 'primary' : 'secondary'}
-              style={styles.chip}
-            />
-          ))}
-        </View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterRow}>
+          {IDEA_GENERATION_CATEGORY_PREFERENCES.map((value) => {
+            const active = categories.includes(value);
+            return (
+              <Pressable
+                key={value}
+                onPress={() => setCategories((previous) => toggleMultiSelection(previous, value))}
+                style={[styles.filterChip, active && styles.filterChipActive]}>
+                <Text style={[styles.filterChipText, active && styles.filterChipTextActive]}>{value}</Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
       </View>
 
       <View style={styles.group}>
@@ -114,32 +138,42 @@ export default function NewIdeasTabScreen() {
 
       <View style={styles.group}>
         <Text style={styles.label}>Tech stack preference</Text>
-        <View style={styles.row}>
-          {IDEA_TECH_STACK_PREFERENCES.map((value) => (
-            <PrimaryButton
-              key={value}
-              label={value}
-              onPress={() => setTechStack(value)}
-              variant={techStack === value ? 'primary' : 'secondary'}
-              style={styles.chip}
-            />
-          ))}
-        </View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterRow}>
+          {IDEA_TECH_STACK_PREFERENCES.map((value) => {
+            const active = techStacks.includes(value);
+            return (
+              <Pressable
+                key={value}
+                onPress={() => setTechStacks((previous) => toggleMultiSelection(previous, value))}
+                style={[styles.filterChip, active && styles.filterChipActive]}>
+                <Text style={[styles.filterChipText, active && styles.filterChipTextActive]}>{value}</Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
       </View>
 
       <View style={styles.group}>
         <Text style={styles.label}>Social theme</Text>
-        <View style={styles.row}>
-          {IDEA_SOCIAL_THEME_PREFERENCES.map((value) => (
-            <PrimaryButton
-              key={value}
-              label={value}
-              onPress={() => setSocialTheme(value)}
-              variant={socialTheme === value ? 'primary' : 'secondary'}
-              style={styles.chip}
-            />
-          ))}
-        </View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterRow}>
+          {IDEA_SOCIAL_THEME_PREFERENCES.map((value) => {
+            const active = socialThemes.includes(value);
+            return (
+              <Pressable
+                key={value}
+                onPress={() => setSocialThemes((previous) => toggleMultiSelection(previous, value))}
+                style={[styles.filterChip, active && styles.filterChipActive]}>
+                <Text style={[styles.filterChipText, active && styles.filterChipTextActive]}>{value}</Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
       </View>
 
       <View style={styles.group}>
@@ -236,6 +270,32 @@ const styles = StyleSheet.create({
   },
   chip: {
     paddingVertical: 10,
+  },
+  filterRow: {
+    gap: 8,
+    paddingRight: Theme.spacing.md,
+  },
+  filterChip: {
+    height: FILTER_CHIP_HEIGHT,
+    borderWidth: 1,
+    borderColor: Theme.colors.border,
+    borderRadius: 12,
+    backgroundColor: Theme.colors.surface,
+    paddingHorizontal: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterChipActive: {
+    backgroundColor: Theme.colors.primary,
+    borderColor: Theme.colors.primary,
+  },
+  filterChipText: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: Theme.colors.text,
+  },
+  filterChipTextActive: {
+    color: '#FFFFFF',
   },
   countRow: {
     gap: COUNT_ITEM_GAP,

@@ -8,29 +8,45 @@ import { TagChip } from './TagChip';
 type Props = {
   idea: Idea;
   dimmed?: boolean;
+  intent?: 'neutral' | 'save' | 'skip';
 };
 
-const CATEGORY_GRADIENTS: Record<Idea['category'], [string, string, string]> = {
-  'AI Tool': ['#0B1F5E', '#1D4ED8', '#0EA5E9'],
-  Education: ['#0A3B8E', '#2563EB', '#22D3EE'],
-  'Mobile App': ['#0F2A6B', '#1E40AF', '#38BDF8'],
-  Other: ['#1E293B', '#334155', '#475569'],
-  'Productivity Tool': ['#0B3A75', '#0369A1', '#06B6D4'],
-  Social: ['#1E3A8A', '#2563EB', '#14B8A6'],
-  Website: ['#0C4A6E', '#0369A1', '#0EA5E9'],
+const INTENT_GRADIENTS: Record<NonNullable<Props['intent']>, [string, string, string]> = {
+  neutral: ['#F8FAFC', '#EEF2F7', '#E2E8F0'],
+  save: ['#DCFCE7', '#BBF7D0', '#86EFAC'],
+  skip: ['#FEE2E2', '#FECACA', '#FCA5A5'],
 };
 
-export const SwipeIdeaCard = ({ idea, dimmed = false }: Props) => (
+const INTENT_BORDER_COLORS: Record<NonNullable<Props['intent']>, string> = {
+  neutral: 'rgba(148, 163, 184, 0.42)',
+  save: 'rgba(22, 163, 74, 0.45)',
+  skip: 'rgba(220, 38, 38, 0.4)',
+};
+
+const INTENT_SHADOW_COLORS: Record<NonNullable<Props['intent']>, string> = {
+  neutral: '#334155',
+  save: '#16A34A',
+  skip: '#DC2626',
+};
+
+export const SwipeIdeaCard = ({ idea, dimmed = false, intent = 'neutral' }: Props) => (
   <View style={[styles.cardWrap, dimmed && styles.cardDimmed]}>
     <LinearGradient
-      colors={CATEGORY_GRADIENTS[idea.category]}
+      colors={INTENT_GRADIENTS[intent]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.gradient}
     />
     <View style={styles.glossLayer} />
 
-    <View style={styles.card}>
+    <View
+      style={[
+        styles.card,
+        {
+          borderColor: INTENT_BORDER_COLORS[intent],
+          shadowColor: INTENT_SHADOW_COLORS[intent],
+        },
+      ]}>
       <View style={styles.top}>
         <TagChip text={idea.category} />
         <TagChip text={idea.difficulty} />
@@ -54,28 +70,26 @@ const styles = StyleSheet.create({
   cardWrap: {
     borderRadius: Theme.radius.lg,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(59, 130, 246, 0.38)',
-    shadowColor: '#1E3A8A',
-    shadowOpacity: 0.22,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 12 },
-    elevation: 5,
   },
   gradient: {
     ...StyleSheet.absoluteFillObject,
   },
   glossLayer: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(255,255,255,0.12)',
   },
   card: {
     margin: 1,
     borderRadius: Theme.radius.lg - 1,
-    backgroundColor: 'rgba(255,255,255,0.87)',
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderWidth: 1,
     padding: Theme.spacing.lg,
     minHeight: 340,
     gap: 14,
+    shadowOpacity: 0.13,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 4,
   },
   cardDimmed: {
     opacity: 0.62,

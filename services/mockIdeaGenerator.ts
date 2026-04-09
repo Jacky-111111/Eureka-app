@@ -125,6 +125,34 @@ const enrichIdea = (idea: Omit<Idea, 'id' | 'createdAt' | 'updatedAt'>): Idea =>
 
 const normalize = (value: string) => value.toLowerCase();
 
+const matchesCategoryPreference = (idea: Omit<Idea, 'id' | 'createdAt' | 'updatedAt'>, preference: string) => {
+  if (idea.category === preference) {
+    return true;
+  }
+
+  const searchableText = `${idea.title} ${idea.description} ${(idea.tags ?? []).join(' ')}`.toLowerCase();
+  switch (preference) {
+    case 'FinTech':
+      return searchableText.includes('finance') || searchableText.includes('payment') || searchableText.includes('wallet');
+    case 'Healthcare':
+      return searchableText.includes('health') || searchableText.includes('medical') || searchableText.includes('habit');
+    case 'E-commerce':
+      return searchableText.includes('shop') || searchableText.includes('commerce') || searchableText.includes('order');
+    case 'Creator Economy':
+      return searchableText.includes('creator') || searchableText.includes('content') || searchableText.includes('portfolio');
+    case 'SaaS':
+      return searchableText.includes('dashboard') || searchableText.includes('workflow') || searchableText.includes('planner');
+    case 'Marketplace':
+      return searchableText.includes('marketplace') || searchableText.includes('matching');
+    case 'Gaming':
+      return searchableText.includes('rpg') || searchableText.includes('gamification') || searchableText.includes('game');
+    case 'Climate':
+      return searchableText.includes('sustain') || searchableText.includes('climate') || searchableText.includes('carbon');
+    default:
+      return false;
+  }
+};
+
 const matchesTechStackPreference = (idea: Omit<Idea, 'id' | 'createdAt' | 'updatedAt'>, preference: string) => {
   const tech = idea.techStack.map(normalize).join(' ');
 
@@ -146,6 +174,16 @@ const matchesTechStackPreference = (idea: Omit<Idea, 'id' | 'createdAt' | 'updat
         tech.includes('whisper') ||
         tech.includes('api')
       );
+    case 'Node.js':
+      return tech.includes('node.js');
+    case 'SQL/Database':
+      return tech.includes('sqlite') || tech.includes('postgres') || tech.includes('sql');
+    case 'Cloud':
+      return tech.includes('firebase') || tech.includes('supabase');
+    case 'No-code':
+      return tech.includes('notion') || tech.includes('zapier') || tech.includes('airtable');
+    case 'Data/ML':
+      return tech.includes('python') || tech.includes('openai') || tech.includes('whisper');
     default:
       return true;
   }
@@ -167,6 +205,16 @@ const matchesSocialTheme = (idea: Omit<Idea, 'id' | 'createdAt' | 'updatedAt'>, 
       return searchableText.includes('travel') || searchableText.includes('menu') || searchableText.includes('translator');
     case 'Sustainability':
       return searchableText.includes('sustain') || searchableText.includes('climate') || searchableText.includes('carbon');
+    case 'Accessibility':
+      return searchableText.includes('accessibility') || searchableText.includes('inclusive') || searchableText.includes('assist');
+    case 'Mental Health':
+      return searchableText.includes('mental') || searchableText.includes('focus') || searchableText.includes('stress');
+    case 'Local Business':
+      return searchableText.includes('restaurant') || searchableText.includes('local') || searchableText.includes('small business');
+    case 'Remote Work':
+      return searchableText.includes('remote') || searchableText.includes('meeting') || searchableText.includes('productivity');
+    case 'Elderly Care':
+      return searchableText.includes('elder') || searchableText.includes('senior') || searchableText.includes('caregiver');
     default:
       return true;
   }
@@ -178,20 +226,38 @@ export const mockIdeaGenerator = {
 
     let pool = [...MOCK_IDEAS];
 
-    if (request.category && request.category !== 'Any') {
-      pool = pool.filter((idea) => idea.category === request.category);
+    const categoryPreferences =
+      request.categories?.filter((value) => value !== 'Any') ??
+      (request.category && request.category !== 'Any' ? [request.category] : []);
+
+    if (categoryPreferences.length > 0) {
+      pool = pool.filter((idea) =>
+        categoryPreferences.some((preference) => matchesCategoryPreference(idea, preference)),
+      );
     }
 
     if (request.difficulty && request.difficulty !== 'Any') {
       pool = pool.filter((idea) => idea.difficulty === request.difficulty);
     }
 
-    if (request.techStack && request.techStack !== 'Any') {
-      pool = pool.filter((idea) => matchesTechStackPreference(idea, request.techStack as string));
+    const techStackPreferences =
+      request.techStacks?.filter((value) => value !== 'Any') ??
+      (request.techStack && request.techStack !== 'Any' ? [request.techStack] : []);
+
+    if (techStackPreferences.length > 0) {
+      pool = pool.filter((idea) =>
+        techStackPreferences.some((preference) => matchesTechStackPreference(idea, preference)),
+      );
     }
 
-    if (request.socialTheme && request.socialTheme !== 'Any') {
-      pool = pool.filter((idea) => matchesSocialTheme(idea, request.socialTheme as string));
+    const socialThemePreferences =
+      request.socialThemes?.filter((value) => value !== 'Any') ??
+      (request.socialTheme && request.socialTheme !== 'Any' ? [request.socialTheme] : []);
+
+    if (socialThemePreferences.length > 0) {
+      pool = pool.filter((idea) =>
+        socialThemePreferences.some((preference) => matchesSocialTheme(idea, preference)),
+      );
     }
 
     if (pool.length === 0) {

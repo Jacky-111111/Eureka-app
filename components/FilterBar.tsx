@@ -122,7 +122,9 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   segment: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#E9EEF5',
+    borderWidth: 1,
+    borderColor: '#D7DEE8',
     borderRadius: 12,
     padding: 3,
     flexDirection: 'row',
@@ -137,6 +139,8 @@ const styles = StyleSheet.create({
   },
   segmentItemActive: {
     backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: Theme.colors.border,
     shadowColor: '#0F172A',
     shadowOpacity: 0.08,
     shadowRadius: 6,

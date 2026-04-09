@@ -1,6 +1,8 @@
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { EmptyState } from '@/components/EmptyState';
 import { FilterBar } from '@/components/FilterBar';
@@ -24,6 +26,7 @@ export default function MyIdeasTabScreen() {
     sortOption,
     setCategoryFilter,
     setSortOption,
+    deleteIdea,
     refresh,
   } = useIdeas();
 
@@ -51,6 +54,13 @@ export default function MyIdeasTabScreen() {
     });
   }, [displayedIdeas, searchQuery]);
 
+  const handleDeleteIdea = useCallback(
+    async (id: string) => {
+      await deleteIdea(id);
+    },
+    [deleteIdea],
+  );
+
   return (
     <ScreenContainer>
       <View style={styles.topControls}>
@@ -71,17 +81,25 @@ export default function MyIdeasTabScreen() {
         <View style={styles.viewToggle}>
           <Pressable
             style={[styles.viewToggleItem, viewMode === 'list' && styles.viewToggleItemActive]}
-            onPress={() => setViewMode('list')}>
-            <Text style={[styles.viewToggleText, viewMode === 'list' && styles.viewToggleTextActive]}>
-              List
-            </Text>
+            onPress={() => setViewMode('list')}
+            accessibilityRole="button"
+            accessibilityLabel="List view">
+            <Ionicons
+              name={viewMode === 'list' ? 'list' : 'list-outline'}
+              size={18}
+              color={viewMode === 'list' ? Theme.colors.text : Theme.colors.textSecondary}
+            />
           </Pressable>
           <Pressable
             style={[styles.viewToggleItem, viewMode === 'grid' && styles.viewToggleItemActive]}
-            onPress={() => setViewMode('grid')}>
-            <Text style={[styles.viewToggleText, viewMode === 'grid' && styles.viewToggleTextActive]}>
-              Grid
-            </Text>
+            onPress={() => setViewMode('grid')}
+            accessibilityRole="button"
+            accessibilityLabel="Grid view">
+            <Ionicons
+              name={viewMode === 'grid' ? 'grid' : 'grid-outline'}
+              size={17}
+              color={viewMode === 'grid' ? Theme.colors.text : Theme.colors.textSecondary}
+            />
           </Pressable>
         </View>
       </View>
@@ -119,13 +137,19 @@ export default function MyIdeasTabScreen() {
             viewMode === 'grid' ? (
               <GridIdeaItem idea={item} onPress={() => router.push(`/ideas/${item.id}`)} />
             ) : (
-              <IdeaListItem idea={item} onPress={() => router.push(`/ideas/${item.id}`)} />
+              <SwipeableIdeaItem
+                idea={item}
+                onPress={() => router.push(`/ideas/${item.id}`)}
+                onDelete={handleDeleteIdea}
+              />
             )
           }
         />
       ) : null}
 
-      <PrimaryButton label="Create New Idea" onPress={() => router.push('/ideas/create')} />
+      {!loading && !error && displayedIdeas.length > 0 ? (
+        <PrimaryButton label="Create New Idea" onPress={() => router.push('/ideas/create')} />
+      ) : null}
     </ScreenContainer>
   );
 }
@@ -133,6 +157,12 @@ export default function MyIdeasTabScreen() {
 type GridIdeaItemProps = {
   idea: Idea;
   onPress: () => void;
+};
+
+type SwipeableIdeaItemProps = {
+  idea: Idea;
+  onPress: () => void;
+  onDelete: (id: string) => Promise<void>;
 };
 
 const GridIdeaItem = ({ idea, onPress }: GridIdeaItemProps) => (
@@ -153,6 +183,30 @@ const GridIdeaItem = ({ idea, onPress }: GridIdeaItemProps) => (
     </View>
   </Pressable>
 );
+
+const SwipeableIdeaItem = ({ idea, onPress, onDelete }: SwipeableIdeaItemProps) => {
+  const swipeableRef = useRef<Swipeable>(null);
+
+  const handleDelete = async () => {
+    swipeableRef.current?.close();
+    await onDelete(idea.id);
+  };
+
+  return (
+    <Swipeable
+      ref={swipeableRef}
+      overshootRight={false}
+      friction={2}
+      rightThreshold={32}
+      renderRightActions={() => (
+        <Pressable style={styles.deleteAction} onPress={() => void handleDelete()}>
+          <Text style={styles.deleteActionText}>Delete</Text>
+        </Pressable>
+      )}>
+      <IdeaListItem idea={idea} onPress={onPress} />
+    </Swipeable>
+  );
+};
 
 const styles = StyleSheet.create({
   topControls: {
@@ -177,31 +231,27 @@ const styles = StyleSheet.create({
     color: Theme.colors.text,
   },
   viewToggle: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#F3F6FA',
+    borderWidth: 1,
+    borderColor: '#E3E9F1',
     borderRadius: 12,
-    padding: 3,
+    padding: 2,
     flexDirection: 'row',
-    gap: 4,
+    gap: 2,
+    alignSelf: 'flex-end',
+    width: 88,
   },
   viewToggleItem: {
     flex: 1,
-    borderRadius: 10,
-    paddingVertical: 8,
+    borderRadius: 9,
+    paddingVertical: 6,
     alignItems: 'center',
     justifyContent: 'center',
   },
   viewToggleItemActive: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: Theme.colors.border,
-  },
-  viewToggleText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Theme.colors.textSecondary,
-  },
-  viewToggleTextActive: {
-    color: Theme.colors.text,
+    borderColor: '#D6DEE9',
   },
   gridCard: {
     flex: 1,
@@ -244,5 +294,18 @@ const styles = StyleSheet.create({
   error: {
     color: Theme.colors.danger,
     fontWeight: '600',
+  },
+  deleteAction: {
+    width: 92,
+    borderRadius: Theme.radius.md,
+    backgroundColor: Theme.colors.danger,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 8,
+  },
+  deleteActionText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 14,
   },
 });

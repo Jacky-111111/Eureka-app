@@ -20,7 +20,12 @@ export type IdeaTechStackPreference =
   | 'Python'
   | 'JavaScript/TypeScript'
   | 'Firebase'
-  | 'AI/API';
+  | 'AI/API'
+  | 'Node.js'
+  | 'SQL/Database'
+  | 'Cloud'
+  | 'No-code'
+  | 'Data/ML';
 
 export type IdeaSocialThemePreference =
   | 'Any'
@@ -29,7 +34,24 @@ export type IdeaSocialThemePreference =
   | 'Family'
   | 'Community'
   | 'Travel'
-  | 'Sustainability';
+  | 'Sustainability'
+  | 'Accessibility'
+  | 'Mental Health'
+  | 'Local Business'
+  | 'Remote Work'
+  | 'Elderly Care';
+
+export type IdeaGenerationCategoryPreference =
+  | 'Any'
+  | IdeaCategory
+  | 'FinTech'
+  | 'Healthcare'
+  | 'E-commerce'
+  | 'Creator Economy'
+  | 'SaaS'
+  | 'Marketplace'
+  | 'Gaming'
+  | 'Climate';
 
 export type Idea = {
   id: string;
@@ -48,9 +70,12 @@ export type Idea = {
 export type IdeaGenerationRequest = {
   prompt?: string;
   category?: IdeaCategory | 'Any';
+  categories?: IdeaGenerationCategoryPreference[];
   difficulty?: IdeaDifficulty | 'Any';
   techStack?: IdeaTechStackPreference;
+  techStacks?: IdeaTechStackPreference[];
   socialTheme?: IdeaSocialThemePreference;
+  socialThemes?: IdeaSocialThemePreference[];
   count?: number;
 };
 
