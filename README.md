@@ -1,19 +1,19 @@
 # Eureka App
 
-AI-assisted idea management app built with Expo + React Native.
+This is an AI-assisted idea management iOS app built with Expo + React Native. I came up with this idea becasue I found it hard to come up with practical and creative ideas this time, and I realized it would be helpful to have AI provide inspiration, evaluation, and improvement throughout this process.
 
-## Main Navigation (Left / Right)
+## Main Navigation tabs
 
 - **Left tab: `My Ideas`**
   - Search saved ideas by title, tags, and tech stack.
-  - Filter and sort existing ideas.
+  - Filter and sort stored ideas.
   - Switch between list view and grid view.
-  - Open idea detail, edit/archive/delete ideas, and use AI review/chat on detail page.
+  - Open idea detail, edit/delete ideas, and use AI review/chat.
 - **Right tab: `New Ideas`**
-  - Configure generation filters (category, difficulty, count, etc.).
-  - Generate new idea candidates.
+  - Set generation filters (category, difficulty, count, etc.).
+  - Generate new ideas.
   - Swipe through generated cards and choose `Save` or `Skip`.
-  - Saved ideas are written to local storage and appear in `My Ideas`.
+  - Saved ideas are stored locally and will appear in `My Ideas`.
 
 ## Current Features
 
@@ -65,10 +65,7 @@ AI-assisted idea management app built with Expo + React Native.
 - Current implementation calls OpenAI directly from app env vars for local development.
 - For production, move API key to your backend and proxy requests securely.
 
-## Scripts
+## Things I learned about mobile developments that surprised me (for 15-113):
 
-- `npm run start` - start Expo
-- `npm run android` - run Android
-- `npm run ios` - run iOS native build (`expo run:ios`)
-- `npm run web` - run web
-- `npm run lint` - run lint
+- I was surprised by how many exisitng packages are there for iOS developers, and most of them are quite useful.
+- It was unexpected for me that camera functions and testing are poorly supported in the simulator, which pushed me to give up on an idea that relied on camera.
