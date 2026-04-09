@@ -19,7 +19,8 @@
         "monochromeImage": "./assets/images/Eureka_icon.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.Eurekaapp"
     },
     "web": {
       "output": "static",
