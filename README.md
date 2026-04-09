@@ -2,6 +2,19 @@
 
 AI-assisted idea management app built with Expo + React Native.
 
+## Main Navigation (Left / Right)
+
+- **Left tab: `My Ideas`**
+  - Search saved ideas by title, tags, and tech stack.
+  - Filter and sort existing ideas.
+  - Switch between list view and grid view.
+  - Open idea detail, edit/archive/delete ideas, and use AI review/chat on detail page.
+- **Right tab: `New Ideas`**
+  - Configure generation filters (category, difficulty, count, etc.).
+  - Generate new idea candidates.
+  - Swipe through generated cards and choose `Save` or `Skip`.
+  - Saved ideas are written to local storage and appear in `My Ideas`.
+
 ## Current Features
 
 - Generate idea candidates from AI flow (`New Ideas`) with category, difficulty, and count filters.
@@ -35,10 +48,13 @@ AI-assisted idea management app built with Expo + React Native.
    EXPO_PUBLIC_OPENAI_MODEL=gpt-4.1-mini
    ```
 
+   - `EXPO_PUBLIC_OPENAI_API_KEY` is required for local AI generation/review/chat.
+   - If `EXPO_PUBLIC_OPENAI_MODEL` is not provided, the app defaults to `gpt-4.1-mini`.
+
 3. Start the app:
 
    ```bash
-   npx expo start
+   npx expo run:ios
    ```
 
 ## AI Integration Notes
@@ -53,6 +69,6 @@ AI-assisted idea management app built with Expo + React Native.
 
 - `npm run start` - start Expo
 - `npm run android` - run Android
-- `npm run ios` - run iOS
+- `npm run ios` - run iOS native build (`expo run:ios`)
 - `npm run web` - run web
 - `npm run lint` - run lint

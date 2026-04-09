@@ -1,6 +1,16 @@
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useMemo, useRef, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  FlatList,
+  LayoutAnimation,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  UIManager,
+  View,
+} from 'react-native';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
@@ -36,6 +46,12 @@ export default function MyIdeasTabScreen() {
     }, [refresh]),
   );
 
+  useEffect(() => {
+    if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+      UIManager.setLayoutAnimationEnabledExperimental(true);
+    }
+  }, []);
+
   const searchedIdeas = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     if (!query) {
@@ -56,6 +72,7 @@ export default function MyIdeasTabScreen() {
 
   const handleDeleteIdea = useCallback(
     async (id: string) => {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       await deleteIdea(id);
     },
     [deleteIdea],
